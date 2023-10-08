@@ -12,10 +12,10 @@ In this paper, we propose a novel anomaly detection method by learning tissue-sp
 The intensities of tissues in different modalities is a unique characteristic of the tissue. Therefore, the translation functions of 'known' tissues among different modalities is not transferable to 'unknown' tissues, making modality translation an ideal choice for anomaly detection.
 Our translation function is trained on in-distribution training data, and the anomalies are detected by the high translation error during inference.
 Cyclic translation is further proposed so that only single modality data is needed during inference, while multiple modalities are needed for training. In this repository, UNet is used as a basic translation model to prove this idea. 
-![Image text](https://github.com/ZiyunLiang/MMCCD_private/blob/master/img/img1.png)
+![Image text](https://github.com/ZiyunLiang/MMCCD/blob/main/img/img1.png)
 
 Furthermore, Masked Conditional Diffusion Model is implemented as the forward translation model to show that diffusion model based inpainting can further improve the anomaly segmentation performance.
-![Image text](https://github.com/ZiyunLiang/MMCCD_private/blob/master/img/img2.png)
+![Image text](https://github.com/ZiyunLiang/MMCCD/blob/main/img/img2.png)
 
 ## Usage:
 
