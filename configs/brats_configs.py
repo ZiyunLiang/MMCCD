@@ -58,7 +58,6 @@ def get_default_configs():
     training_score.ema_rate = "0.9999"  # comma-separated list of EMA values
     training_score.log_interval = 100
     training_score.save_interval = 5000
-    training_score.resume_checkpoint = ""
     training_score.use_fp16 = score_model.use_fp16
     training_score.fp16_scale_growth = 1e-3
     training_score.iterations = 80000
