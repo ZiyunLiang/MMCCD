@@ -436,7 +436,7 @@ def configure(experiment_name: Path, format_strs=None, comm=None, log_suffix="")
     """
     If comm is provided, average all numerical stats across that comm
     """
-    dir = Path(r"../model_save") / experiment_name
+    dir = Path(r"./model_save") / experiment_name
     dir.mkdir(exist_ok=True, parents=True)
     dir = str(dir.resolve())
 
