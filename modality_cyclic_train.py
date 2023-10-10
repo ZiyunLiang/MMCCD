@@ -77,7 +77,6 @@ def main(args):
         ema_rate=config.score_model.training.ema_rate,
         log_interval=config.score_model.training.log_interval,
         save_interval=config.score_model.training.save_interval,
-        resume_checkpoint=config.score_model.training.resume_checkpoint,
         use_fp16=config.score_model.training.use_fp16,
         fp16_scale_growth=config.score_model.training.fp16_scale_growth,
         schedule_sampler=schedule_sampler,
