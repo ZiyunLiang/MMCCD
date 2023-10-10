@@ -16,9 +16,6 @@ import torch as th
 from tqdm.auto import tqdm
 from .nn import mean_flat
 
-import matplotlib.pyplot as plt
-
-
 def normalize(img):
     _min = img.min()
     _max = img.max()
