@@ -21,18 +21,28 @@ Furthermore, Masked Conditional Diffusion Model is implemented as the forward tr
 
 ### 1. preparation
 **1.1 Environment**
+**1.1 Environment**
 We recommand you using conda for installing the depandencies.
+The following command will help you create a new conda environment will all the required libraries installed: 
+```
+conda env create -f environment.yml
+conda activate MMCCD
+```
 For manualy installing packages:
 - `Python`                 3.9
 - `torch`                   1.13.0
-- `blobfile`                2.0.0
-- `numpy`                   1.23.4
-- `scikit-learn`            1.2.1
-- `scikit-image`            0.19.3
+- `blobfile`                2.0.2
+- `numpy`                   1.23.0
+- `scikit-learn`            1.3.1
+- `scikit-image`            0.22.0
+- `mpi4py`                  3.1.5
 - `scipy`                   1.10.0
-- `tqdm`                    4.64.1
+- `tqdm`                    4.66.1
 - `wandb`                   0.15.4
-- `nibabel`                 4.0.2
+- `nibabel`                 5.1.0
+- `monai`                   1.2.0
+- `tensorboard`            2.14.1
+- -`ml_collections`         0.1.1
 
 The project can be cloned using:
 ```
