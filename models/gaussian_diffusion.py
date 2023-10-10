@@ -652,7 +652,6 @@ class GaussianDiffusion:
             x,
             cond,
             t,
-        model_name=None,
             clip_denoised=True,
             denoised_fn=None,
             cond_fn=None,
