@@ -16,7 +16,7 @@ from sklearn.metrics import roc_auc_score, jaccard_score
 
 from datasets import loader
 from configs import get_config
-from utils import logger, dist_util
+from utils import logger
 from utils.script_util import create_gaussian_diffusion, create_score_model
 from utils.binary_metrics import assd_metric, sensitivity_metric, precision_metric
 sys.path.append(str(Path.cwd()))
@@ -64,17 +64,17 @@ def main(args):
     model_forward = create_score_model(config, image_level_cond)
     model_backward = create_score_model(config, image_level_cond)
 
-    filename = "model080000.pt"
+    filename = "model075000.pt"
     with bf.BlobFile(bf.join(logger.get_dir(), filename), "rb") as f:
         model_forward.load_state_dict(
-            dist_util.load_state_dict(f.name, map_location=dist_util.dev())
+            th.load(f.name, map_location=th.device('cuda'))
         )
-        model_forward.to(dist_util.dev())
+    model_forward.to(th.device('cuda'))
     experiment_name_backward= f.name.split(experiment_name)[0] + args.experiment_name_forward + f.name.split(experiment_name)[1]
-    model_backward.load_state_dict(
-        dist_util.load_state_dict(experiment_name_backward, map_location=dist_util.dev())
+    model_forward.load_state_dict(
+        th.load(experiment_name_backward, map_location=th.device('cuda'))
     )
-    model_backward.to(dist_util.dev())
+    model_backward.to(th.device('cuda'))
 
     if config.score_model.use_fp16:
         model_forward.convert_to_fp16()
