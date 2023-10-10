@@ -1,27 +1,18 @@
 import copy
 import functools
 import os
-from random import randint
+import time
+
 import blobfile as bf
 import torch as th
 import torch.distributed as dist
-from torch.nn.parallel.distributed import DistributedDataParallel as DDP
 from torch.optim import AdamW
 from torch.utils.tensorboard import SummaryWriter
-import torchvision
-from typing import Dict
-import matplotlib.pyplot as plt
-from pathlib import Path
-import numpy as np
-from torch.utils.data import DataLoader
-import csv
 
 from utils import dist_util, logger
 from utils.fp16_util import MixedPrecisionTrainer
 from models.nn import update_ema
 from models.resample import LossAwareSampler, UniformSampler
-import time
-from torchmetrics.functional import structural_similarity_index_measure, peak_signal_noise_ratio
 
 
 class TrainLoop:
@@ -86,8 +77,6 @@ class TrainLoop:
         log_dir = os.path.join('../../logs_loss/', 'train')
         self.writer = SummaryWriter(log_dir=log_dir)
         '''timing'''
-        self.start = th.cuda.Event(enable_timing=True)
-        self.end = th.cuda.Event(enable_timing=True)
         self.args = args
         self.step = 0
         self.resume_step = 0   # if resume model from pretrained
