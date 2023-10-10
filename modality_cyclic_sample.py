@@ -185,8 +185,8 @@ if __name__ == "__main__":
     parser.add_argument("--dataset", help="brats", type=str, default='brats')
     parser.add_argument("--input", help="input modality, choose from flair, t2, t1", type=str, default='flair')
     parser.add_argument("--data_dir", help="data directory", type=str, default='./datasets/data')
-    parser.add_argument("--experiment_name_forward", help="forward model saving file name", type=str, default='forward_brats_t2_flair')
-    parser.add_argument("--experiment_name_backward", help="backward model saving file name", type=str, default='backward_brats_t2_flair')
+    parser.add_argument("--experiment_name_forward", help="forward model saving file name", type=str, default='forward_brats_flair_t2')
+    parser.add_argument("--experiment_name_backward", help="backward model saving file name", type=str, default='backward_brats_flair_t2')
     parser.add_argument("--model_name", help="translated model: unet or diffusion", type=str, default='unet')
     parser.add_argument("--use_ddim", help="if you want to use ddim during sampling, True or False", type=str, default='True')
     parser.add_argument("--timestep_respacing", help="If you want to rescale timestep during sampling. enter the timestep you want to rescale the diffusion prcess to. If you do not wish to resale thetimestep, leave it blank or put 1000.", type=int,
