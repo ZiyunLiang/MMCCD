@@ -9,7 +9,7 @@ import torch.distributed as dist
 from torch.optim import AdamW
 from torch.utils.tensorboard import SummaryWriter
 
-from utils import dist_util, logger
+from utils import logger
 from utils.fp16_util import MixedPrecisionTrainer
 from models.nn import update_ema
 from models.resample import LossAwareSampler, UniformSampler
@@ -27,7 +27,6 @@ class TrainLoop:
             ema_rate,
             log_interval,
             save_interval,
-            resume_checkpoint,
             use_fp16=False,
             fp16_scale_growth=1e-3,
             schedule_sampler=None,
@@ -57,7 +56,6 @@ class TrainLoop:
         )
         self.log_interval = log_interval
         self.save_interval = save_interval
-        self.resume_checkpoint = resume_checkpoint
         self.use_fp16 = use_fp16
         self.fp16_scale_growth = fp16_scale_growth
         self.schedule_sampler = schedule_sampler or UniformSampler(diffusion)
@@ -79,7 +77,6 @@ class TrainLoop:
         '''timing'''
         self.args = args
         self.step = 0
-        self.resume_step = 0   # if resume model from pretrained
         self.time_iter_start = 0
         self.forward_backward_time = 0
         self.device = device
@@ -87,7 +84,6 @@ class TrainLoop:
         self.recursive_flag = 0
         self.sync_cuda = th.cuda.is_available()
 
-        self._load_and_sync_parameters()
         self.mp_trainer = MixedPrecisionTrainer(
             model=self.model,
             use_fp16=self.use_fp16,
@@ -98,60 +94,10 @@ class TrainLoop:
             self.mp_trainer.master_params, lr=self.lr, weight_decay=self.weight_decay
         )
 
-        if self.resume_step:
-            self._load_optimizer_state()
-            # Model was resumed, either due to a restart or a checkpoint
-            # being specified at the command line.
-            self.ema_params = [
-                self._load_ema_parameters(rate) for rate in self.ema_rate
-            ]
-        else:
-            self.ema_params = [
-                copy.deepcopy(self.mp_trainer.master_params)
-                for _ in range(len(self.ema_rate))
-            ]
-
-    def _load_and_sync_parameters(self):
-        resume_checkpoint = find_resume_checkpoint() or self.resume_checkpoint
-
-        if resume_checkpoint:
-            self.resume_step = parse_resume_step_from_filename(resume_checkpoint)
-            if dist.get_rank() == 0:
-                logger.log(f"loading model from checkpoint: {resume_checkpoint}...")
-                self.model.load_state_dict(
-                    dist_util.load_state_dict(
-                        resume_checkpoint, map_location=dist_util.dev()
-                    )
-                )
-
-
-    def _load_ema_parameters(self, rate):
-        ema_params = copy.deepcopy(self.mp_trainer.master_params)
-
-        main_checkpoint = find_resume_checkpoint() or self.resume_checkpoint
-        ema_checkpoint = find_ema_checkpoint(main_checkpoint, self.resume_step, rate)
-        if ema_checkpoint:
-            if dist.get_rank() == 0:
-                logger.log(f"loading EMA from checkpoint: {ema_checkpoint}...")
-                state_dict = dist_util.load_state_dict(
-                    ema_checkpoint, map_location=dist_util.dev()
-                )
-                ema_params = self.mp_trainer.state_dict_to_master_params(state_dict)
-
-        dist_util.sync_params(ema_params)
-        return ema_params
-
-    def _load_optimizer_state(self):
-        main_checkpoint = find_resume_checkpoint() or self.resume_checkpoint
-        opt_checkpoint = bf.join(
-            bf.dirname(main_checkpoint), f"opt{self.resume_step:06}.pt"
-        )
-        if bf.exists(opt_checkpoint):
-            logger.log(f"loading optimizer state from checkpoint: {opt_checkpoint}")
-            state_dict = dist_util.load_state_dict(
-                opt_checkpoint, map_location=dist_util.dev()
-            )
-            self.opt.load_state_dict(state_dict)
+        self.ema_params = [
+            copy.deepcopy(self.mp_trainer.master_params)
+            for _ in range(len(self.ema_rate))
+        ]
 
     def run_loop(self):
         while (
@@ -258,15 +204,15 @@ class TrainLoop:
             param_group["lr"] = lr
 
     def log_step(self):
-        logger.logkv("step", self.step + self.resume_step)
-        logger.logkv("samples", (self.step + self.resume_step + 1))
+        logger.logkv("step", self.step)
+        logger.logkv("samples", (self.step + 1))
         logger.logkv("time 100iter", self.time_iter)
 
     def save(self):
         def save_checkpoint(params):
             state_dict = self.mp_trainer.master_params_to_state_dict(params)
             logger.log(f"saving model ...")
-            filename = f"model{(self.step + self.resume_step):06d}.pt"
+            filename = f"model{(self.step):06d}.pt"
             with bf.BlobFile(bf.join(get_blob_logdir(), filename), "wb") as f:
                 th.save(state_dict, f)
 
