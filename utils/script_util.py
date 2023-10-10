@@ -1,9 +1,6 @@
-import argparse
 import ml_collections
 
 from models import gaussian_diffusion as gd
-from models.gaussian_diffusion import GaussianDiffusion
-# from codes.models import unet, unet_original
 from models import unet
 from models.respace import SpacedDiffusion, space_timesteps
 
@@ -34,26 +31,8 @@ def create_score_model(config: ml_collections.ConfigDict, image_level_cond):
 def create_gaussian_diffusion(config, timestep_respacing):
     betas = gd.get_named_beta_schedule(config.diffusion.noise_schedule, config.diffusion.steps)
 
-    # timestep_respacing = config.diffusion.timestep_respacing
     if not timestep_respacing:
-        timestep_respacing = [config.diffusion.steps]
-    # return GaussianDiffusion(
-    #         betas=betas,
-    #         model_mean_type=(
-    #             gd.ModelMeanType.EPSILON if not config.diffusion.predict_xstart else gd.ModelMeanType.START_X
-    #         ),
-    #         model_var_type=(
-    #             (
-    #                 gd.ModelVarType.FIXED_LARGE
-    #                 if not config.diffusion.sigma_small
-    #                 else gd.ModelVarType.FIXED_SMALL
-    #             )
-    #             if not config.diffusion.learn_sigma
-    #             else gd.ModelVarType.LEARNED_RANGE
-    #         ),
-    #         rescale_timesteps=config.diffusion.rescale_timesteps,
-    #         conditioning_noise=config.diffusion.conditioning_noise
-    # )
+        timestep_respacing = config.diffusion.steps
     return SpacedDiffusion(
         use_timesteps=space_timesteps(config.diffusion.steps, timestep_respacing),
         betas=betas,
