@@ -70,7 +70,7 @@ def main(args):
             th.load(f.name, map_location=th.device('cuda'))
         )
     model_forward.to(th.device('cuda'))
-    experiment_name_backward= f.name.split(experiment_name)[0] + args.experiment_name_forward + f.name.split(experiment_name)[1]
+    experiment_name_backward= f.name.split(experiment_name)[0] + args.experiment_name_backward + f.name.split(experiment_name)[1]
     model_forward.load_state_dict(
         th.load(experiment_name_backward, map_location=th.device('cuda'))
     )
@@ -148,7 +148,7 @@ def main(args):
     logger.log("computing the matrixs...")
     mask_inpaint_input = (np.where(max_dice_index / 1000 < error_map, 1.0, 0.0) * brain_mask_all)
     for num in range(len(test_loader.dataset)):
-        pred_thre = normalize(mask_inpaint_input[num, 0, :,:]) * shrunken_brain_mask  # check what is the normalize for? I think it can be deleted
+        pred_thre = normalize(mask_inpaint_input[num, 0, :,:]) * shrunken_brain_mask
         assd += assd_metric(pred_thre, test_data_seg_all[num, 0, :, :])
         sensitivity += sensitivity_metric(pred_thre, test_data_seg_all[num, 0, :, :])
         precision += precision_metric(pred_thre, test_data_seg_all[num, 0, :, :])
