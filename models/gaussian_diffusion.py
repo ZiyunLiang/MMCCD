@@ -653,7 +653,6 @@ class GaussianDiffusion:
             cond,
             t,
             clip_denoised=True,
-            denoised_fn=None,
             cond_fn=None,
             model_kwargs=None,
             eta=0.0,
@@ -669,7 +668,6 @@ class GaussianDiffusion:
             t,
             cond,
             clip_denoised=clip_denoised,
-            denoised_fn=denoised_fn,
             model_kwargs=model_kwargs,
         )
         score_mean = out["mean"]
@@ -700,7 +698,7 @@ class GaussianDiffusion:
         if cond_fn is not None:
             result_dict.update({"class_cond": out["class_cond"]})
 
-        return result_dic
+        return result_dict
 
 
 
