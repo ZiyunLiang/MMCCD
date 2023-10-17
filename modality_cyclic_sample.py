@@ -125,8 +125,8 @@ def main(args):
             ddim=args.use_ddim
         )
         num_iter += 1
-        img_true_all[num_sample:num_sample+test_data_input.shape[0]] = sample_2.detach().cpu().numpy()
-        img_pred_all[num_sample:num_sample+test_data_input.shape[0]] = test_data_input.cpu().numpy()
+        img_true_all[num_sample:num_sample+test_data_input.shape[0]] = test_data_input.detach().cpu().numpy()
+        img_pred_all[num_sample:num_sample+test_data_input.shape[0]] = sample_2.cpu().numpy()
         brain_mask_all[num_sample:num_sample+test_data_input.shape[0]] = brain_mask.cpu().numpy()
         test_data_seg_all[num_sample:num_sample+test_data_input.shape[0]] = test_data_seg.cpu().numpy()
         num_sample += test_data_input.shape[0]
