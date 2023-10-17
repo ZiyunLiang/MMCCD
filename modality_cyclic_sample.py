@@ -148,7 +148,7 @@ def main(args):
     logger.log("computing the matrixs...")
     mask_inpaint_input = (np.where(max_dice_index / 1000 < error_map, 1.0, 0.0) * brain_mask_all)
     for num in range(len(test_loader.dataset)):
-        pred_thre = normalize(mask_inpaint_input[num, 0, :,:]) * shrunken_brain_mask
+        pred_thre = mask_inpaint_input[num, 0, :,:] * shrunken_brain_mask
         assd += assd_metric(pred_thre, test_data_seg_all[num, 0, :, :])
         sensitivity += sensitivity_metric(pred_thre, test_data_seg_all[num, 0, :, :])
         precision += precision_metric(pred_thre, test_data_seg_all[num, 0, :, :])
