@@ -71,7 +71,7 @@ def main(args):
         )
     model_forward.to(th.device('cuda'))
     experiment_name_backward= f.name.split(experiment_name)[0] + args.experiment_name_backward + f.name.split(experiment_name)[1]
-    model_forward.load_state_dict(
+    model_backward.load_state_dict(
         th.load(experiment_name_backward, map_location=th.device('cuda'))
     )
     model_backward.to(th.device('cuda'))
@@ -131,7 +131,7 @@ def main(args):
         test_data_seg_all[num_sample:num_sample+test_data_input.shape[0]] = test_data_seg.cpu().numpy()
         num_sample += test_data_input.shape[0]
     logger.log("all the confidence maps from the testing set saved...")
-    error_map = normalize((img_true_all - img_pred_all) ** 2)  # I added the normalize, let's see how it works
+    error_map = normalize((img_true_all - img_pred_all) ** 2) 
     logger.log("finding the best threshold...")
     for thres in range(100):
         mask_inpaint_input = np.where(thres / 1000 < error_map, 1.0, 0.0) * brain_mask_all
