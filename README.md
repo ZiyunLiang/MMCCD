@@ -38,7 +38,6 @@ For manualy installing packages:
 - `mpi4py`                  3.1.5
 - `scipy`                   1.10.0
 - `tqdm`                    4.66.1
-- `wandb`                   0.15.4
 - `nibabel`                 5.1.0
 - `monai`                   1.2.0
 - `tensorboard`            2.14.1
