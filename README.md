@@ -35,7 +35,6 @@ For manualy installing packages:
 - `numpy`                   1.23.0
 - `scikit-learn`            1.3.1
 - `scikit-image`            0.22.0
-- `mpi4py`                  3.1.5
 - `scipy`                   1.10.0
 - `tqdm`                    4.66.1
 - `nibabel`                 5.1.0
