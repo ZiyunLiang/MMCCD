@@ -12,10 +12,10 @@ In this paper, we propose a novel anomaly detection method by learning tissue-sp
 The intensities of tissues in different modalities is a unique characteristic of the tissue. Therefore, the translation functions of 'known' tissues among different modalities is not transferable to 'unknown' tissues, making modality translation an ideal choice for anomaly detection.
 Our translation function is trained on in-distribution training data, and the anomalies are detected by the high translation error during inference.
 Cyclic translation is further proposed so that only single modality data is needed during inference, while multiple modalities are needed for training. In this repository, UNet is used as a basic translation model to prove this idea. 
-![Image text](https://github.com/ZiyunLiang/MMCCD/blob/main/img/img1.png)
+![Image text](https://github.com/ZiyunLiang/MMCCD/blob/master/img/img1.png)
 
 Furthermore, Masked Conditional Diffusion Model is implemented as the forward translation model to show that diffusion model based inpainting can further improve the anomaly segmentation performance.
-![Image text](https://github.com/ZiyunLiang/MMCCD/blob/main/img/img2.png)
+![Image text](https://github.com/ZiyunLiang/MMCCD/blob/master/img/img2.png)
 
 ## Usage:
 
@@ -75,7 +75,6 @@ The  training script is in `modality_cyclic_train.py`. The arguments for this sc
   - `--data_dir` The directory of the already preprocessed brats data. Default: './datasets/data'
   - `--input` The input modality in the cyclic translation process, which is the only modality used for testing. Default: 'flair'
   - `--trans` The translated modality in the cyclic translation process, which is the intermediate modality in the cyclic process. Default: 't2'
-  - `--training_process` Is it the forward or backward model in the cyclic process you are training? The input should be 'forward' or 'backward'. Default: 'forward'
   - `--experiment_name` The file name for saving the model. Default: 'None'
   - `--model_name` Which model is selected for the translation process. Only unet and diffusion model are included in this implementation, feel free to add your own translation model. 
 The input should be either 'unet' or 'diffusion'. In our implementation, if you want to try out the model using basic unet ('Cyclic UNet'), then both forward and backward model should be set to 'unet'. 
@@ -83,15 +82,19 @@ If you want to try out translation with diffusion model (MMCCD), then the model 
  Default: 'unet'
 
 The other hyperparameters used for training are in `./config/brats_config.py`. Note that the model needs to be trained twice for the forward and backward process.
-Below is an example script for training the model with our default settings on cyclic UNet:
+Below is an example script for training the forward and backward unet model with our default settings on cyclic UNet:
 ```
-python modality_cyclic_train.py --training_process forward
-pythonmodality_cyclic_train.py --training_process backward
+python modality_cyclic_train.py --input flair --trans t2 --model_name unet 
+```
+```
+python modality_cyclic_train.py --input t2 --trans flair --model_name unet 
 ```
 Here is another example script for training the model for MMCCD (using diffusion model) which input modality is flair, and translated modality is t1. The model is saved to the file 'diffusion_brats_flair_t1':
 ```
-python modality_cyclic_train.py --training_process forward --input flair --trans t1 --model_name diffusion --experiment_name diffusion_brats_t2_flair
-python modality_cyclic_train.py --training_process backward --input flair --trans t1 --model_name unet 
+python modality_cyclic_train.py --input flair --trans t1 --model_name diffusion 
+```
+```
+python modality_cyclic_train.py --input t1 --trans flair --model_name unet 
 ```
 
 ### 3. Testing 
@@ -108,15 +111,14 @@ the input should be either 'unet' or 'diffusion'. If 'unet' is chosen, it will p
   - `--timestep_respacing` 
 The other hyperparameters used for testing are in `./config/brats_config.py`.
 
-Below is an example script for training the model with our default settings:
+Below is an example script for testing with our default settings using Cyclic UNet:
 ```
-python modality_cyclic_test.py
+python modality_cyclic_test.py 
 ```
-Here is another example script for testing the model for MMCCD (using diffusion model) 
-which input modality is flair, 
-and the forward model is loaded from the file 'forward_brats_t2_flair':
+Here is another example script for testing the model for MMCCD (using diffusion model). The input modality is flair, 
+and the forward model is loaded from the file 'diffusion_brats_flair_t2', the backward model is loaded from the file 'unet_brats_t2_flair':
 ```
-python modality_cyclic_test.py --experiment_name_forward forward_brats_t1_flair --experiment_name_backward forward_brats_t1_flair --dataset flair --model_name diffusion --use_ddim True
+python modality_cyclic_test.py --experiment_name_forward diffusion_brats_flair_t2 --experiment_name_backward unet_brats_t2_flair --dataset flair --model_name diffusion --use_ddim True
 ```
 ## Citation
 If you have any questions, please contact Ziyun Liang (ziyun.liang@eng.ox.ac.uk) and I am happy to discuss more with you. 
