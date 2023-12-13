@@ -15,6 +15,8 @@ import numpy as np
 import torch as th
 from tqdm.auto import tqdm
 from .nn import mean_flat
+import blobfile as bf
+from utils import logger
 
 def normalize(img):
     _min = img.min()
@@ -488,6 +490,7 @@ class GaussianDiffusion:
             model_forward,
             model_backward,
             test_data_input,
+            num_batch,
             shape,
             model_name=None,
             clip_denoised=True,
@@ -518,6 +521,7 @@ class GaussianDiffusion:
                 model_forward,
                 model_backward,
                 test_data_input,
+                num_batch,
                 shape,
                 model_name=model_name,
                 clip_denoised=clip_denoised,
@@ -535,6 +539,7 @@ class GaussianDiffusion:
             model_forward,
             model_backward,
             test_data_input,
+            num_batch,
             shape,
             model_name=None,
             clip_denoised=True,
@@ -558,10 +563,11 @@ class GaussianDiffusion:
 
         if model_name == 'diffusion':
             indices = list(range(self.num_timesteps))[::-1]
-            indices = tqdm(indices)
+            num_mask = list(range(128))
+            num_mask = tqdm(num_mask)
 
             noise = th.randn(*shape, device=device)
-            for num_repeat in range(128):
+            for num_repeat in num_mask:
                 len_mask = 16
                 ### generate grid masks for abnormalty detection ####
                 mask = th.ones(shape).cuda()
@@ -602,49 +608,46 @@ class GaussianDiffusion:
 
                         prev_img_forward = out_forward["sample"]
 
-                    x_yield1 = prev_img_forward
+                    x_yield = prev_img_forward
                     img_forward = prev_img_forward
 
-                noise = th.randn(shape, device=device)
-                img_backward = noise
-                cond_backward = img_forward.cuda()
-                indices_2 = indices
-                indices_2 = tqdm(indices_2)
-                for i_backward in indices_2:
-                    t_backward = th.tensor([i_backward] * shape[0], device=device)
-                    with th.no_grad():
-                        if ddim is False:
-                            out_backward = self.p_sample(
-                                model_backward,
-                                img_backward,
-                                cond_backward,
-                                t_backward,
-                                clip_denoised=clip_denoised,
-                                model_kwargs=model_kwargs,
-                            )
-                        else:
-                            out_backward = self.ddim_sample(
-                                model_backward,
-                                img_backward,
-                                cond_backward,
-                                t_backward,
-                                clip_denoised=clip_denoised,
-                                model_kwargs=model_kwargs,
-                                eta=eta,
-                            )
+                img_backward = model_backward(img_forward.cuda(), **model_kwargs)
+                if num_repeat == 0:
+                    mask_batch = mask.unsqueeze(0).detach().cpu()
+                    img_backward_batch = img_backward.unsqueeze(0).detach().cpu()
+                elif num_repeat != 0:
+                    mask_batch = th.cat((mask_batch, mask.unsqueeze(0).detach().cpu()), dim=0)
+                    img_backward_batch = th.cat((img_backward_batch, img_backward.unsqueeze(0).detach().cpu()), dim=0)
+            filename_mask = f"mask.pt"
+            filename_x0 = f"cyclic_predict.pt"
+            if num_batch == 0:
+                mask_all = mask_batch
+                img_backward_all = img_backward_batch
+                with bf.BlobFile(bf.join(logger.get_dir(), filename_mask), "wb") as f:
+                    th.save(mask_all, f)
+                with bf.BlobFile(bf.join(logger.get_dir(), filename_x0), "wb") as f:
+                    th.save(img_backward_all, f)
 
-                        x0_prev_backward = out_backward["sample"]
+            else:
+                with bf.BlobFile(bf.join(logger.get_dir(), filename_mask), "rb") as f:
+                    tensor_load_mask = th.load(f)
+                with bf.BlobFile(bf.join(logger.get_dir(), filename_x0), "rb") as f:
+                    tensor_load_x0 = th.load(f)
+                mask_all = th.cat((tensor_load_mask, mask_batch), dim=1)
+                with bf.BlobFile(bf.join(logger.get_dir(), filename_mask), "wb") as f:
+                    th.save(mask_all, f)
+                img_backward_all = th.cat((tensor_load_x0, img_backward_batch), dim=1)
+                with bf.BlobFile(bf.join(logger.get_dir(), filename_x0), "wb") as f:
+                    th.save(img_backward_all, f)
 
-                    img_backward = x0_prev_backward
-                    x_yield2 = x0_prev_backward
 
-                    yield x_yield1, x_yield2
+            yield x_yield
         elif model_name == 'unet':
             with th.no_grad():
                 x0_pred_forward = model_forward(test_data_input, **model_kwargs)
                 x0_pred_backward = model_backward(x0_pred_forward, **model_kwargs)
 
-                yield x0_pred_forward, x0_pred_backward
+                yield x0_pred_backward
 
     def ddim_sample(
             self,

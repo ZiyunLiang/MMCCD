@@ -27,7 +27,7 @@ def main(args):
     if args.experiment_name != 'None':
         experiment_name = args.experiment_name
     else:
-        experiment_name = args.training_process + '_' + args.dataset + '_' + args.input + '_' + args.trans
+        experiment_name = args.model_name + '_' + args.dataset + '_' + args.input + '_' + args.trans
 
     logger.configure(Path(experiment_name)/"score_train",
                      format_strs=["log", "stdout", "csv", "tensorboard"])
@@ -53,14 +53,8 @@ def main(args):
     logger.log(f"Model number of parameters {pytorch_total_params}")
     schedule_sampler = create_named_schedule_sampler(config.score_model.training.schedule_sampler, diffusion)
 
-    if args.training_process == 'forward':
-        input = args.input
-        trans = args.trans
-    elif args.training_process == 'backward':
-        input = args.trans
-        trans = args.input
-    else:
-        raise Exception("Training process does exit")
+    input = args.input
+    trans = args.trans
 
     logger.log("creating data loader...")
     train_loader = loader.get_data_loader(args.dataset, args.data_dir, config, input, trans, split_set='train', generator=True)
@@ -99,7 +93,6 @@ if __name__ == "__main__":
     parser.add_argument("--dataset", help="brats", type=str, default='brats')
     parser.add_argument("--input", help="input modality, choose from flair, t2, t1", type=str, default='flair')
     parser.add_argument("--trans", help="translated modality, choose from flair, t2, t1", type=str, default='t2')
-    parser.add_argument("--training_process", help="forward or backward", type=str, default='forward')
     parser.add_argument("--data_dir", help="data directory", type=str, default='./datasets/data')
     parser.add_argument("--experiment_name", help="model saving file name", type=str, default='None')
     parser.add_argument("--model_name", help="translated model: unet or diffusion", type=str, default='unet')
