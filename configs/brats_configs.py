@@ -52,7 +52,7 @@ def get_default_configs():
     training_score.schedule_sampler = "uniform"  # "uniform" or "loss-second-moment"
     training_score.lr = 1e-4
     training_score.weight_decay = 0.00
-    training_score.lr_decay_steps = 0
+    training_score.lr_decay_steps = 150000
     training_score.lr_decay_factor = 0.5
     training_score.batch_size = 32
     training_score.ema_rate = "0.9999"  # comma-separated list of EMA values
