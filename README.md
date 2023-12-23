@@ -98,7 +98,7 @@ python modality_cyclic_train.py --input t1 --trans flair --model_name unet
 ```
 
 ### 3. Testing 
-The testing script is in `modality_cyclic_test.py`.
+The testing script is in `modality_cyclic_sample.py`.
 The arguments for this script are:
   - `--gpu_id` Allows you to choose the GPU that you want to use for this experiment. Default: '0'
   - `--dataset` Allows you to choose the dataset that you want to use for this experiment, only BraTS is included in this implementation. Feel free to test it on your own dataset. Default: 'brats'
@@ -113,12 +113,12 @@ The other hyperparameters used for testing are in `./config/brats_config.py`.
 
 Below is an example script for testing with our default settings using Cyclic UNet:
 ```
-python modality_cyclic_test.py 
+python modality_cyclic_sample.py 
 ```
 Here is another example script for testing the model for MMCCD (using diffusion model). The input modality is flair, 
 and the forward model is loaded from the file 'diffusion_brats_flair_t2', the backward model is loaded from the file 'unet_brats_t2_flair':
 ```
-python modality_cyclic_test.py --experiment_name_forward diffusion_brats_flair_t2 --experiment_name_backward unet_brats_t2_flair --dataset flair --model_name diffusion --use_ddim True
+python modality_cyclic_sample.py --experiment_name_forward diffusion_brats_flair_t2 --experiment_name_backward unet_brats_t2_flair --dataset flair --model_name diffusion --use_ddim True
 ```
 ## Citation
 If you have any questions, please contact Ziyun Liang (ziyun.liang@eng.ox.ac.uk) and I am happy to discuss more with you. 

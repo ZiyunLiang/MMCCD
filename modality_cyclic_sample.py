@@ -66,7 +66,7 @@ def main(args):
     model_forward = create_score_model(config, image_level_cond_forward)
     model_backward = create_score_model(config, image_level_cond_backward)
 
-    filename = "model000000.pt"
+    filename = "model080000.pt"
     with bf.BlobFile(bf.join(logger.get_dir(), filename), "rb") as f:
         model_forward.load_state_dict(
             th.load(f.name, map_location=th.device('cuda'))

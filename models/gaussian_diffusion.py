@@ -568,8 +568,8 @@ class GaussianDiffusion:
 
             noise = th.randn(*shape, device=device)
             for num_repeat in num_mask:
-                len_mask = 16
                 ### generate grid masks for abnormalty detection ####
+                len_mask = 16
                 mask = th.ones(shape).cuda()
                 start_pix = (num_repeat % 64)*2
                 direction = num_repeat // 64
