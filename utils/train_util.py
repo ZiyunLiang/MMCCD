@@ -82,6 +82,7 @@ class TrainLoop:
         self.device = device
         self.x0_pred = None
         self.recursive_flag = 0
+        self.resume_step = 0
         self.sync_cuda = th.cuda.is_available()
 
         self.mp_trainer = MixedPrecisionTrainer(
