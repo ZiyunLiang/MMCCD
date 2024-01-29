@@ -60,7 +60,7 @@ def get_default_configs():
     training_score.save_interval = 5000
     training_score.use_fp16 = score_model.use_fp16
     training_score.fp16_scale_growth = 1e-3
-    training_score.iterations = 80000
+    training_score.iterations = 100000
 
     config.sampling = sampling = ml_collections.ConfigDict()
     sampling.clip_denoised = False

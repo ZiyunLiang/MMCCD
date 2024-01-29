@@ -497,6 +497,8 @@ class GaussianDiffusion:
             model_kwargs=None,
             device=None,
             eta=0.0,
+            model_forward_name: str =None,
+            model_backward_name: str =None,
             ddim: bool = False
     ):
         """
@@ -528,6 +530,8 @@ class GaussianDiffusion:
                 model_kwargs=model_kwargs,
                 device=device,
                 eta=eta,
+                model_forward_name=model_forward_name,
+                model_backward_name=model_backward_name,
                 ddim=ddim
         ):
             final = sample
@@ -546,6 +550,8 @@ class GaussianDiffusion:
             model_kwargs=None,
             device=None,
             eta=0.0,
+            model_forward_name: str=None,
+            model_backward_name: str=None,
             ddim: bool=False
     ):
         """
@@ -618,8 +624,8 @@ class GaussianDiffusion:
                 elif num_repeat != 0:
                     mask_batch = th.cat((mask_batch, mask.unsqueeze(0).detach().cpu()), dim=0)
                     img_backward_batch = th.cat((img_backward_batch, img_backward.unsqueeze(0).detach().cpu()), dim=0)
-            filename_mask = f"mask.pt"
-            filename_x0 = f"cyclic_predict.pt"
+            filename_mask = "mask_forward_" + model_forward_name + '_backward_' + model_backward_name + ".pt"
+            filename_x0 = "cyclic_predict_" + model_forward_name + '_backward_' + model_backward_name + ".pt"
             if num_batch == 0:
                 mask_all = mask_batch
                 img_backward_all = img_backward_batch

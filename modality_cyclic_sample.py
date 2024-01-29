@@ -66,7 +66,7 @@ def main(args):
     model_forward = create_score_model(config, image_level_cond_forward)
     model_backward = create_score_model(config, image_level_cond_backward)
 
-    filename = "model080000.pt"
+    filename = "model100000.pt"
     with bf.BlobFile(bf.join(logger.get_dir(), filename), "rb") as f:
         model_forward.load_state_dict(
             th.load(f.name, map_location=th.device('cuda'))
@@ -124,7 +124,10 @@ def main(args):
             clip_denoised=config.sampling.clip_denoised,  # is True, clip the denoised signal into [-1, 1].
             model_kwargs=model_kwargs,  # reconstruction = True
             eta=config.sampling.eta,
+            model_forward_name=args.experiment_name_forward,
+            model_backward_name=args.experiment_name_backward,
             ddim=args.use_ddim
+
         )
         num_batch += 1
         img_true_all[num_sample:num_sample+test_data_input.shape[0]] = test_data_input.detach().cpu().numpy()
@@ -136,8 +139,8 @@ def main(args):
     if args.model_name == 'unet':
         error_map = normalize((img_true_all - img_pred_all) ** 2)
     elif args.model_name == 'diffusion':
-        filename_mask = f"mask.pt"
-        filename_x0 = f"cyclic_predict.pt"
+        filename_mask = "mask_forward_"+args.experiment_name_forward+'_backward_'+args.experiment_name_backward+".pt"
+        filename_x0 = "cyclic_predict_"+args.experiment_name_forward+'_backward_'+args.experiment_name_backward+".pt"
         with bf.BlobFile(bf.join(logger.get_dir(), filename_mask), "rb") as f:
             tensor_load_mask = th.load(f)
         with bf.BlobFile(bf.join(logger.get_dir(), filename_x0), "rb") as f:
